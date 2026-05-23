@@ -57,6 +57,53 @@ FONT_CANDIDATES = [
 ]
 
 
+def _wrap_text(font: pygame.font.Font, text: str, max_width: int) -> list[str]:
+    words = text.split()
+    if not words:
+        return [""]
+
+    lines: list[str] = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        if font.size(candidate)[0] <= max_width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    lines.append(current)
+    return lines
+
+
+def _blit_wrapped_text(
+    screen: pygame.Surface,
+    font: pygame.font.Font,
+    text: str,
+    color: tuple[int, int, int],
+    x: int,
+    y: int,
+    max_width: int,
+    *,
+    max_lines: int = 2,
+    line_gap: int = 4,
+) -> int:
+    lines = _wrap_text(font, text, max_width)
+    rendered_lines = lines[:max_lines]
+    if len(lines) > max_lines:
+        last = rendered_lines[-1]
+        ellipsis = "..."
+        while last and font.size(last + ellipsis)[0] > max_width:
+            last = last[:-1]
+        rendered_lines[-1] = (last + ellipsis).rstrip()
+
+    line_height = font.get_linesize()
+    for idx, line in enumerate(rendered_lines):
+        surface = font.render(line, True, color)
+        screen.blit(surface, (x, y + idx * (line_height + line_gap)))
+
+    return y + len(rendered_lines) * line_height + max(0, len(rendered_lines) - 1) * line_gap
+
+
 def _draw_background(screen: pygame.Surface) -> None:
     for y in range(HEIGHT):
         blend = y / HEIGHT
@@ -108,7 +155,7 @@ def _draw_board(
     text_font: pygame.font.Font,
     autoplay_remaining: int,
 ) -> None:
-    top_bar = pygame.Rect(40, 20, WIDTH - 80, 108)
+    top_bar = pygame.Rect(40, 20, WIDTH - 80, 118)
     _draw_elevated_surface(
         screen,
         top_bar,
@@ -118,23 +165,62 @@ def _draw_board(
         shadow_alpha=24,
     )
 
-    title = title_font.render("Tower of Hanoi", True, ON_SURFACE)
-    subtitle = text_font.render(
-        "Arrow keys move cursor. Enter/Space picks or places. A autoplay. N new, R reset, Q quit.",
-        True,
-        ON_SURFACE_VARIANT,
+    metrics_card = pygame.Rect(top_bar.right - 286, top_bar.y + 26, 250, 70)
+    _draw_elevated_surface(
+        screen,
+        metrics_card,
+        radius=16,
+        fill=PRIMARY_CONTAINER,
+        border=(128, 220, 236),
+        shadow_alpha=18,
     )
-    screen.blit(title, (62, 34))
-    screen.blit(subtitle, (62, 80))
 
-    status_chip = pygame.Rect(WIDTH - 304, 42, 240, 42)
-    pygame.draw.rect(screen, PRIMARY_CONTAINER, status_chip, border_radius=18)
-    pygame.draw.rect(screen, (128, 220, 236), status_chip, width=1, border_radius=18)
+    left_x = 62
+    left_y = 34
+    left_w = metrics_card.x - left_x - 24
+
+    title = title_font.render("Tower of Hanoi", True, ON_SURFACE)
+    screen.blit(title, (left_x, left_y))
+
+    subtitle_y = left_y + title.get_height() + 6
+    _blit_wrapped_text(
+        screen,
+        text_font,
+        "Arrow keys move cursor. Enter/Space picks or places. A autoplay. N new, R reset, Q quit.",
+        ON_SURFACE_VARIANT,
+        left_x,
+        subtitle_y,
+        left_w,
+        max_lines=2,
+    )
+
     status = f"Pieces {game.piece_count}   Moves {game.move_count}"
     status_text = text_font.render(status, True, ON_PRIMARY_CONTAINER)
-    screen.blit(status_text, (status_chip.x + 18, status_chip.y + 9))
+    screen.blit(status_text, (metrics_card.x + 14, metrics_card.y + 10))
 
-    board_rect = pygame.Rect(46, 158, WIDTH - 92, HEIGHT - 204)
+    optimal_text_card = text_font.render(
+        f"Optimal {game.get_optimal_moves()}", True, ON_PRIMARY_CONTAINER
+    )
+    screen.blit(optimal_text_card, (metrics_card.x + 14, metrics_card.y + 40))
+
+    info_y = top_bar.bottom + 8
+    if autoplay_remaining > 0:
+        auto_chip = pygame.Rect(56, info_y, 266, 30)
+        pygame.draw.rect(screen, PRIMARY_CONTAINER, auto_chip, border_radius=14)
+        pygame.draw.rect(screen, (128, 220, 236), auto_chip, width=1, border_radius=14)
+        auto_text = text_font.render(f"Autoplay {autoplay_remaining} moves", True, PRIMARY)
+        screen.blit(auto_text, (auto_chip.x + 12, auto_chip.y + 4))
+
+    win_y = info_y
+    if autoplay_remaining > 0:
+        win_y += 34
+
+    if game.has_won:
+        win_text = title_font.render("Solved! Press N for a new challenge.", True, TERTIARY)
+        screen.blit(win_text, (WIDTH // 2 - win_text.get_width() // 2, win_y))
+
+    board_top = win_y + (title_font.get_height() + 10 if game.has_won else 8)
+    board_rect = pygame.Rect(46, board_top, WIDTH - 92, HEIGHT - board_top - 46)
     _draw_elevated_surface(
         screen,
         board_rect,
@@ -178,17 +264,8 @@ def _draw_board(
             pygame.draw.rect(screen, color, disk_rect, border_radius=8)
             pygame.draw.rect(screen, (255, 255, 255), disk_rect, width=1, border_radius=8)
 
-    if game.has_won:
-        win_text = title_font.render("Solved! Press N for a new challenge.", True, TERTIARY)
-        screen.blit(win_text, (WIDTH // 2 - win_text.get_width() // 2, 136))
-
-    footer_y = HEIGHT - 34
-    optimal_text = text_font.render(f"Optimal {game.get_optimal_moves()}", True, ON_SURFACE_VARIANT)
-    screen.blit(optimal_text, (62, footer_y))
-
-    if autoplay_remaining > 0:
-        auto_text = text_font.render(f"Autoplay {autoplay_remaining} moves", True, PRIMARY)
-        screen.blit(auto_text, (62 + optimal_text.get_width() + 24, footer_y))
+    footer_note = text_font.render("Goal: move all disks to the right-most tower", True, ON_SURFACE_VARIANT)
+    screen.blit(footer_note, (62, HEIGHT - 34))
 
 
 def _draw_prompt(
