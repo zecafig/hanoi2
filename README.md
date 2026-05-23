@@ -1,7 +1,7 @@
 # Tower of Hanoi 2
 
 ![CI](https://github.com/zecafig/hanoi2/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
+![Coverage](https://codecov.io/gh/zecafig/hanoi2/branch/main/graph/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![pygame-ce](https://img.shields.io/badge/pygame--ce-2.x-00bcd4)
 ![Ruff](https://img.shields.io/badge/lint-ruff-46a758)
