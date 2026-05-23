@@ -1,0 +1,33 @@
+{
+  "project_slug": "hanoi2",
+  "base_branch": "main",
+  "existing_root_doc": "AGENTS.md",
+  "workflows_wanted": [
+    "document",
+    "review",
+    "changelog"
+  ],
+  "tech_stack": [
+    "Python3"
+  ],
+  "core_rules": [
+    "Root doc remains minimal and links to canonical skill/workflow files",
+    "Workflow IDs and file paths stay consistent across references",
+    "Each workflow contract includes Goal, Scope, Triggers, Inputs, Invariants, Procedure, Outputs, Review gate, References",
+    "Avoid duplication; link to the source of truth",
+    "Scaffold only requested workflows",
+    "All contract links resolve"
+  ],
+  "stack_specific_rules": [
+    "Use TDD for any task.",
+    "Run ruff check and ensure coverage is 100% before suggesting commit.",
+    "Write Pythonic code.",
+    "Avoid regressions.",
+    "Always use .venv.",
+    "Always use Material Design for UI.",
+    "\"Clean the house\" means checking for legacy or useless code.",
+    "Always let the user test and review before suggesting a commit."
+  ],
+  "notes": [],
+  "collected_at_utc": "2026-05-22T20:25:23+00:00"
+}

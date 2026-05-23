@@ -1,0 +1,24 @@
+{
+  "official_awb_repo": "/Users/zecafig/Documents/GitHub/agentic-workflow-blueprint",
+  "official_awb_commit": "c82379ef6ba8fa9fc5d9967c7c1144015496cb6f",
+  "workflows_selected": [
+    "document",
+    "review",
+    "changelog"
+  ],
+  "runbooks_selected": [
+    "document-review-changelog.md"
+  ],
+  "required_artifacts": [
+    "/Users/zecafig/Documents/GitHub/hanoi2/AGENTS.md",
+    "/Users/zecafig/Documents/GitHub/hanoi2/blue_print_used_on_creation.md",
+    "/Users/zecafig/Documents/GitHub/hanoi2/bootstrap_checklist.md",
+    "/Users/zecafig/Documents/GitHub/hanoi2/agentic_workflow_blueprint_guidance.md",
+    "/Users/zecafig/Documents/GitHub/hanoi2/bootstrap/inputs/blueprint_inputs_hanoi2_20260522T202523Z.json",
+    "/Users/zecafig/Documents/GitHub/hanoi2/bootstrap/inputs/blueprint_inputs_hanoi2_20260522T202523Z.md",
+    "/Users/zecafig/Documents/GitHub/hanoi2/workflows/document",
+    "/Users/zecafig/Documents/GitHub/hanoi2/workflows/review",
+    "/Users/zecafig/Documents/GitHub/hanoi2/workflows/changelog",
+    "/Users/zecafig/Documents/GitHub/hanoi2/runbooks/document-review-changelog.md"
+  ]
+}
